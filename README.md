@@ -3,6 +3,27 @@ This is a library to interface with La Marzocco's "new" Home machines (currently
 
 It's in experimentals stages and meant mainly to connect to the Micra, as for the other IoT enabled machines you can use the [lmdirect](https://github.com/rccoleman/lmdirect) library.
 
+## Dockerized
+
+Standalone scripts are added to toggle coffee boiler and steam boiler respectively.
+
+The scripts can be executed in any network-enabled machine, like a Synology NAS. This version is Docker enabled to ensure a up-to-date Python runtime.
+
+To run the scripts in Synology NAS (general steps below):
+
+1. Install Docker from Synology package center
+2. Sync/copy this repo to a directory on the NAS you have access to, e.g. your home directory
+3. `cd` into the copied repo on the NAS (requires SSH access) and build this into a Docker image (`docker build -t lmcloud .`)
+4. Run the image in a new container either from the UI or with `docker run`
+
+The scripts can be called with a simple `docker exec` command, for example:
+
+```
+docker exec lmcloud python3 toggle_coffee_boiler.py
+```
+
+Assuming the container is named `lmcloud`.
+
 # Libraries in this project
 - `lmlocalapi` calls the new local API the Micra exposes, using the Bearer token from the customer cloud endpoint. However, this API currently only supports getting the config, and some status objects (like shottimer) over websockets, but does not support setting anything (to my knowledge). Local settings appear to only happen through [Bluetooth connections](#lmbluetooth). If La Marzocco updates the firmware or more endpoints are found this library will be updated to reflect those additional endpoints.
 - `lmcloud` interacts with `gw.lamarzocco.com` to send commands. lmcloud can be initialized to only issue remote commands, or to initialize an instance of `lmlocalapi` for getting the current machine settings. This helps to avoid flooding the cloud API and is faster overall.
@@ -46,7 +67,7 @@ creds = {
 
 ```
 
-`lmcloud` exposes two classmethods: One to build an instance with the local API, and one to build an instance relying entirely on cloud functions. 
+`lmcloud` exposes two classmethods: One to build an instance with the local API, and one to build an instance relying entirely on cloud functions.
 
 It is initialized like this
 ```python
@@ -55,10 +76,10 @@ lm_cloud = await LMCloud.create_with_local_api(creds, ip=ip) # with local API
 ```
 
 ## lmlocalapi
-If you just want to run the local API you need the IP of your machine, the Port it is listening on (8081 by default), the Bearer token (`communicationKey`) used for local communication. 
+If you just want to run the local API you need the IP of your machine, the Port it is listening on (8081 by default), the Bearer token (`communicationKey`) used for local communication.
 You can obtain that key by inspecting a call to `https://cms.lamarzocco.io/api/customer`, while connected to `mitmproxy` (process above), or making a new (authenticated) call to that endpoint. `lmcloud` will also connect to this endpoint so you could also used a breakpoint there to get this key, which is stored in a key called `communicationKey`.
 
-Then you can init the class with 
+Then you can init the class with
 ```python
 lm_local_api = LMLocalAPI(ip, bearer)
 ```
