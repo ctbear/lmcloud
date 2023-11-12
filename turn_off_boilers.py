@@ -19,9 +19,9 @@ async def main():
                         level=logging.CRITICAL)
     lmcloud = await LMCloud.create(creds)
     await lmcloud.update_local_machine_status()
-    target_coffee_boiler_status = not lmcloud.current_status['coffee_boiler_on']
-    await lmcloud.set_power(target_coffee_boiler_status)
-    logging.getLogger(__name__).critical("Setting coffee boiler to " + ("ON" if target_coffee_boiler_status else "OFF"))
-    print("Setting coffee boiler to " + ("ON" if target_coffee_boiler_status else "OFF"))
+    await lmcloud.set_steam(False)
+    await lmcloud.set_power(False)
+    logging.getLogger(__name__).critical("Turning boilers off")
+    print("Turning boilers off")
 
 asyncio.run(main())
